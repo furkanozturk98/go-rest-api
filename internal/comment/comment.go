@@ -12,7 +12,11 @@ var (
 )
 
 type Store interface {
+	//NewDatabase() (*db.Database, error)
 	GetComment(context.Context, string) (Comment, error)
+	PostComment(context.Context, Comment) (Comment, error)
+	UpdateComment(context.Context, string, Comment) (Comment, error)
+	DeleteComment(context.Context, string) error
 }
 
 type Comment struct {
@@ -43,17 +47,29 @@ func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
 		return Comment{}, ErrFetchingComment
 	}
 
-	return Comment{}, nil
+	return cmt, nil
 }
 
-func (s *Service) UpdateCommend(ctx context.Context, id string) error {
-	return ErrNotImplemented
+func (s *Service) UpdateCommend(ctx context.Context, id string, updatedCmt Comment) (Comment, error) {
+	cmt, err := s.Store.UpdateComment(ctx, id, updatedCmt)
+
+	if err != nil {
+		fmt.Print("erro updating comment")
+		return Comment{}, err
+	}
+	return cmt, nil
 }
 
 func (s *Service) DeleteComment(ctx context.Context, id string) error {
-	return ErrNotImplemented
+	return s.Store.DeleteComment(ctx, id)
 }
 
-func (s *Service) CreateComment(ctx context.Context, id string) (Comment, error) {
-	return Comment{}, ErrNotImplemented
+func (s *Service) PostComment(ctx context.Context, cmt Comment) (Comment, error) {
+	insertedCmt, err := s.Store.PostComment(ctx, cmt)
+
+	if err != nil {
+		return Comment{}, err
+	}
+
+	return insertedCmt, err
 }
